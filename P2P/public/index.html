@@ -2,50 +2,76 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Box</title>
-  </head>
-  <body>
-    <h1>Chat P2P</h1>
-    <div id="chat">
-      <div id="messages"></div>
-      <input
-        type="text"
-        id="messageInput"
-        placeholder="Digite sua mensagem..."
-      />
-      <button onclick="sendMessage()">Enviar</button>
-    </div>
+    <meta name="viewport" content="width=device-width, initial-scale" />
+    <title>P2P Chat</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #chat {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+      }
+      #message {
+        width: 80%;
+      }
+      #send {
+        width: 15%;
+      }
+    </style>
+    <script type="text/javascript">
+      var ws;
+      function connect() {
+        var ip = document.getElementById('ip').value;
+        ws = new WebSocket('ws://' + ip + ':3000/ws');
 
-    <script>
-      const ws = new WebSocket('ws://localhost:3000/ws');
+        ws.onopen = function () {
+          logMessage('Conectado com: ' + ip);
+        };
 
-      ws.onopen = function () {
-        console.log('Conectado ao WebSocket server');
-      };
+        ws.onmessage = function (event) {
+          logMessage('Recebido: ' + event.data);
+        };
 
-      ws.onmessage = function (event) {
-        const messagesDiv = document.getElementById('messages');
-        const message = document.createElement('div');
-        message.textContent = 'Recebido: ' + event.data;
-        messagesDiv.appendChild(message);
-      };
+        ws.onclose = function () {
+          logMessage('Conexão Fechada');
+        };
 
-      ws.onclose = function () {
-        console.log('Desconectado do WebSocket server');
-      };
+        ws.onerror = function (error) {
+          logMessage('WebSocket Error: ' + error);
+        };
+      }
 
       function sendMessage() {
-        const input = document.getElementById('messageInput');
-        const message = input.value;
+        var message = document.getElementById('message').value;
         ws.send(message);
-        input.value = '';
+        logMessage('Enviado: ' + message);
+        document.getElementById('message').value = '';
+      }
 
-        const messagesDiv = document.getElementById('messages');
-        const messageDiv = document.createElement('div');
-        messageDiv.textContent = 'Enviado: ' + message;
-        messagesDiv.appendChild(messageDiv);
+      function logMessage(message) {
+        var chat = document.getElementById('chat');
+        var p = document.createElement('p');
+        p.textContent = message;
+        chat.appendChild(p);
+        chat.scrollTop = chat.scrollHeight;
       }
     </script>
+  </head>
+  <body>
+    <h1>WebSocket Chat</h1>
+    <div>
+      <label for="ip">Enter IP:</label>
+      <input type="text" id="ip" placeholder="e.g., 192.168.1.100" />
+      <button onclick="connect();">Connect</button>
+    </div>
+    <div id="chat"></div>
+    <div>
+      <input type="text" id="message" placeholder="Type a message" />
+      <button id="send" onclick="sendMessage();">Send</button>
+    </div>
   </body>
 </html>
