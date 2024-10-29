@@ -1,4 +1,4 @@
-module
+module github.com/Gabriel-Nog/Trabalho-redes
 
 go 1.20
 
