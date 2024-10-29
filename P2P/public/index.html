@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Box</title>
+  </head>
+  <body>
+    <h1>Chat P2P</h1>
+    <div id="chat">
+      <div id="messages"></div>
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Digite sua mensagem..."
+      />
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <script>
+      const ws = new WebSocket('ws://localhost:3000/ws');
+
+      ws.onopen = function () {
+        console.log('Conectado ao WebSocket server');
+      };
+
+      ws.onmessage = function (event) {
+        const messagesDiv = document.getElementById('messages');
+        const message = document.createElement('div');
+        message.textContent = 'Recebido: ' + event.data;
+        messagesDiv.appendChild(message);
+      };
+
+      ws.onclose = function () {
+        console.log('Desconectado do WebSocket server');
+      };
+
+      function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value;
+        ws.send(message);
+        input.value = '';
+
+        const messagesDiv = document.getElementById('messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = 'Enviado: ' + message;
+        messagesDiv.appendChild(messageDiv);
+      }
+    </script>
+  </body>
+</html>

@@ -21,7 +21,7 @@ func main() {
 }
 
 func server() {
-	server, err := net.Listen("tcp", porta)
+	ln, err := net.Listen("tcp", porta)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +29,24 @@ func server() {
 	fmt.Println("Servidor: " + GetOutboundIp().String())
 
 	for {
-		// Adicione o código do servidor aqui
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go handleConnection(conn)
+	}
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+	reader := bufio.NewReader(conn)
+	for {
+		message, err := reader.ReadString('\n')
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Print("Mensagem recebida: ", message)
 	}
 }
 

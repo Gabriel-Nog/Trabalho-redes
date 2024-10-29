@@ -1,0 +1,7 @@
+Obter o endereço IP público do servidor
+Você pode obter o endereço IP público do servidor usando um serviço como ifconfig.me ou ipinfo.io:
+
+curl ifconfig.me
+
+Troque o resultado, aqui:
+const ws = new WebSocket("ws://<IP_PUBLICO>:3000/ws");
