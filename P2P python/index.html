@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat P2P</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #chat {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+      }
+      #message {
+        width: 80%;
+      }
+      #send {
+        width: 15%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chat P2P</h1>
+    <label for="ip">Entre com IP:</label>
+    <input type="text" id="ip" placeholder="IP do servidor" />
+    <label for="name">Nome: </label>
+    <input type="text" id="name" placeholder="Digite seu nome: " />
+    <button onclick="connect()">Conectar</button>
+    <div id="chat"></div>
+    <div>
+      <input type="text" id="message" placeholder="Digite sua mensagem" />
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <script>
+      let websocket;
+
+      function connect() {
+        //Conectar ao servidor
+        logMessage('Conectando...');
+        try {
+          logMessage('Conectado');
+          const ip = document.getElementById('ip').value;
+          websocket = new WebSocket(`ws://${ip}:8765`);
+
+          //Quando a conexão é aberta
+          websocket.onmessage = function (event) {
+            logMessage(event.data);
+          };
+        } catch (error) {
+          console.log('Erro ao fechar conexão');
+          websocket.close();
+        }
+      }
+
+      //Enviar mensagem
+      function sendMessage() {
+        const username = document.getElementById('name').value;
+        var message = document.getElementById('message').value;
+        const fullMessage = `${username}: ${message}`;
+        websocket.send(fullMessage);
+        logMessage('Você: ' + message);
+        document.getElementById('message').value = '';
+      }
+
+      //Render
+      function logMessage(message) {
+        var chat = document.getElementById('chat');
+        var p = document.createElement('p');
+        p.textContent = message;
+        chat.appendChild(p);
+        chat.scrollTop = chat.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
