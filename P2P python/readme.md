@@ -5,4 +5,4 @@ Passo 2:
 python http_server.py
 
 Passo 3:
-acessar: http://localhost:8000/index.html
+acessar: http://0.0.0.0:8000/index.html
