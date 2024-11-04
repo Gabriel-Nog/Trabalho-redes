@@ -21,6 +21,10 @@
       #send {
         width: 15%;
       }
+      .closeConnection {
+        display: none;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -34,6 +38,13 @@
     <div>
       <input type="text" id="message" placeholder="Digite sua mensagem" />
       <button onclick="sendMessage()">Enviar</button>
+      <button
+        class="closeConnection"
+        onclick="closeConnection()"
+        id="closeConnection"
+      >
+        Desconectar
+      </button>
     </div>
     <script>
       let websocket;
@@ -42,7 +53,6 @@
         //Conectar ao servidor
         logMessage('Conectando...');
         try {
-          logMessage('Conectado');
           const ip = document.getElementById('ip').value;
           websocket = new WebSocket(`ws://${ip}:8765`);
 
@@ -51,9 +61,24 @@
             logMessage(event.data);
           };
         } catch (error) {
-          console.log('Erro ao fechar conexão');
+          // console.log('Erro ao iniciar conexão');
+          logMessage('Erro ao iniciar conexão');
           websocket.close();
         }
+
+        if (!error) {
+          const ip = document.getElementById('ip').value;
+          document.getElementById('closeConnection').style.display = 'block';
+          logMessage(`Conectado ao: ${ip}`);
+        }
+      }
+
+      //Fechar conexão
+      function closeConnection() {
+        websocket.close();
+        logMessage('Conexão fechada');
+        // console.log('Conexão fechada');
+        document.getElementById('closeConnection').style.display = 'none';
       }
 
       //Enviar mensagem

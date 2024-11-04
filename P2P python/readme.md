@@ -1,3 +1,6 @@
+Passo 0:
+pip install -r requirements.txt
+
 Passo 1:
 python server.py
 

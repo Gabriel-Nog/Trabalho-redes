@@ -1,17 +1,14 @@
 import asyncio
 import websockets
+from unidecode import unidecode
 
 connected_clients = set()
 
 def caesar_cipher(text, shift):
-    result = ""
+    result = []
     for char in text:
-        if char.isalpha():
-            shift_amount = 65 if char.isupper() else 97
-            result += chr((ord(char) + shift - shift_amount) % 26 + shift_amount)
-        else:
-            result += char
-    return result
+       result.append(chr((ord(char) + shift)))
+    return ''.join(result)
 
 def caesar_decipher(text, shift):
     return caesar_cipher(text, -shift)
