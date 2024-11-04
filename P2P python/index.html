@@ -50,32 +50,28 @@
       let websocket;
 
       function connect() {
-        //Conectar ao servidor
+        const ip = document.getElementById('ip').value;
+        const wsUrl = 'ws://' + ip + ':8765';
         logMessage('Conectando...');
         try {
-          const ip = document.getElementById('ip').value;
-          websocket = new WebSocket(`ws://${ip}:8765`);
-
+          websocket = new WebSocket(wsUrl);
+          logMessage('Conectado');
           //Quando a conexão é aberta
+          document.getElementById('closeConnection').style.display = 'block';
           websocket.onmessage = function (event) {
             logMessage(event.data);
           };
         } catch (error) {
-          // console.log('Erro ao iniciar conexão');
           logMessage('Erro ao iniciar conexão');
-          websocket.close();
-        }
-
-        if (!error) {
-          const ip = document.getElementById('ip').value;
-          document.getElementById('closeConnection').style.display = 'block';
-          logMessage(`Conectado ao: ${ip}`);
+          console.error(error);
         }
       }
 
       //Fechar conexão
       function closeConnection() {
-        websocket.close();
+        websocket.onclose = function (event) {
+          logMessage('Conexão fechada');
+        };
         logMessage('Conexão fechada');
         // console.log('Conexão fechada');
         document.getElementById('closeConnection').style.display = 'none';
