@@ -29,10 +29,10 @@
   </head>
   <body>
     <h1>Chat P2P</h1>
-    <label for="ip">Entre com IP:</label>
-    <input type="text" id="ip" placeholder="IP do servidor" />
+    <label for="ip">Entre com IP do outro cliente:</label>
+    <input type="text" id="ip" placeholder="IP do outro cliente" />
     <label for="name">Nome: </label>
-    <input type="text" id="name" placeholder="Digite seu nome: " />
+    <input type="text" id="name" placeholder="Digite seu nome" />
     <button onclick="connect()">Conectar</button>
     <div id="chat"></div>
     <div>
@@ -46,17 +46,21 @@
         Desconectar
       </button>
     </div>
+
     <script>
       let websocket;
+      let peerIp;
+      let username;
 
+      // Função para conectar o cliente ao outro cliente
       function connect() {
-        const ip = document.getElementById('ip').value;
-        const wsUrl = 'ws://' + ip + ':8765';
+        peerIp = document.getElementById('ip').value;
+        username = document.getElementById('name').value;
+        const wsUrl = 'ws://' + peerIp + ':8765'; // O IP do outro cliente
         logMessage('Conectando...');
         try {
           websocket = new WebSocket(wsUrl);
           logMessage('Conectado');
-          //Quando a conexão é aberta
           document.getElementById('closeConnection').style.display = 'block';
           websocket.onmessage = function (event) {
             logMessage(event.data);
@@ -67,27 +71,25 @@
         }
       }
 
-      //Fechar conexão
+      // Função para desconectar
       function closeConnection() {
         websocket.onclose = function (event) {
           logMessage('Conexão fechada');
         };
         logMessage('Conexão fechada');
-        // console.log('Conexão fechada');
         document.getElementById('closeConnection').style.display = 'none';
       }
 
-      //Enviar mensagem
+      // Função para enviar a mensagem
       function sendMessage() {
-        const username = document.getElementById('name').value;
-        var message = document.getElementById('message').value;
+        const message = document.getElementById('message').value;
         const fullMessage = `${username}: ${message}`;
         websocket.send(fullMessage);
         logMessage('Você: ' + message);
         document.getElementById('message').value = '';
       }
 
-      //Render
+      // Função para registrar as mensagens no chat
       function logMessage(message) {
         var chat = document.getElementById('chat');
         var p = document.createElement('p');
