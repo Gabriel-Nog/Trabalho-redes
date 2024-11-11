@@ -29,25 +29,23 @@
   </head>
   <body>
     <h1>Chat P2P</h1>
-    <form onsubmit="return false;">
-      <label for="ip">Entre com IP do outro cliente:</label>
-      <input type="text" id="ip" name="ip" placeholder="IP do outro cliente" />
-      <label for="name">Nome: </label>
-      <input type="text" id="name" placeholder="Digite seu nome" />
-      <button onclick="connect()">Conectar</button>
-      <div id="chat"></div>
-      <div>
-        <input type="text" id="message" placeholder="Digite sua mensagem" />
-        <button onclick="sendMessage()">Enviar</button>
-        <button
-          class="closeConnection"
-          onclick="closeConnection()"
-          id="closeConnection"
-        >
-          Desconectar
-        </button>
-      </div>
-    </form>
+    <label for="ip">Entre com IP do outro cliente:</label>
+    <input type="text" id="ip" name="ip" placeholder="IP do outro cliente" />
+    <label for="name">Nome: </label>
+    <input type="text" id="name" placeholder="Digite seu nome" />
+    <button onclick="connect()">Conectar</button>
+    <div id="chat"></div>
+    <div>
+      <input type="text" id="message" placeholder="Digite sua mensagem" />
+      <button onclick="sendMessage()">Enviar</button>
+      <button
+        class="closeConnection"
+        onclick="closeConnection()"
+        id="closeConnection"
+      >
+        Desconectar
+      </button>
+    </div>
     <script>
       let websocket;
       let peerIp;
@@ -57,7 +55,7 @@
       function connect() {
         peerIp = document.getElementById('ip').value;
         username = document.getElementById('name').value;
-        let wsUrl = `ws://${peerIp}:8765/`;  // Conectar ao servidor WebSocket
+        let wsUrl = `ws://${peerIp}:8765/`; // Conectar ao servidor WebSocket
         logMessage('Conectando...');
         try {
           websocket = new WebSocket(wsUrl);
@@ -68,7 +66,7 @@
           websocket.onmessage = function (event) {
             // Mensagens recebidas (descriptografar)
             const decryptedMessage = caesarCipher(event.data, -3);
-            logMessage(decryptedMessage);
+            logMessage(decryptedMessage); // Exibe a mensagem descriptografada
           };
           websocket.onerror = function (event) {
             console.error('Erro de WebSocket:', event);
@@ -83,6 +81,8 @@
       // Função para desconectar
       function closeConnection() {
         websocket.close();
+        document.getElementById('ip').value = '';
+        document.getElementById('name').value = '';
         logMessage('Conexão fechada');
         document.getElementById('closeConnection').style.display = 'none';
       }
@@ -102,7 +102,9 @@
       function caesarCipher(text, shift) {
         return text
           .split('')
-          .map(char => String.fromCharCode((char.charCodeAt(0) + shift) % 256))
+          .map((char) =>
+            String.fromCharCode((char.charCodeAt(0) + shift) % 256),
+          )
           .join('');
       }
 
