@@ -1,1 +1,3 @@
-tkinter
+socket
+threading
+tkinter  # Certifique-se de que tkinter está instalado no sistema
