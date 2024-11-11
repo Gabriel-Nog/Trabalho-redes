@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat P2P Descentralizado</title>
+    <title>Chat P2P</title>
     <style>
       body {
         font-family: Arial, sans-serif;
       }
       #chat {
-        width: 300px;
-        height: 400px;
         border: 1px solid #ccc;
         padding: 10px;
+        height: 300px;
         overflow-y: scroll;
+        margin-bottom: 10px;
       }
       #message {
         width: 80%;
@@ -21,94 +21,116 @@
       #send {
         width: 15%;
       }
+      .closeConnection {
+        display: none;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
-    <div>
-      <input type="text" id="username" placeholder="Seu nome" />
-      <input type="text" id="peer" placeholder="IP do peer" />
-      <button id="connect">Conectar</button>
-    </div>
-    <div id="chat"></div>
-    <input type="text" id="message" />
-    <button id="send">Enviar</button>
-
+    <h1>Chat P2P</h1>
+    <form onsubmit="return false;">
+      <label for="ip">Entre com IP do outro cliente:</label>
+      <input type="text" id="ip" name="ip" placeholder="IP do outro cliente" />
+      <label for="name">Nome: </label>
+      <input type="text" id="name" placeholder="Digite seu nome" />
+      <button onclick="connect()">Conectar</button>
+      <div id="chat"></div>
+      <div>
+        <input type="text" id="message" placeholder="Digite sua mensagem" />
+        <button onclick="sendMessage()">Enviar</button>
+        <button
+          class="closeConnection"
+          onclick="closeConnection()"
+          id="closeConnection"
+        >
+          Desconectar
+        </button>
+      </div>
+    </form>
     <script>
-      const signalingServer = new WebSocket('ws://localhost:6789');
-      let localConnection;
-      let dataChannel;
+      let websocket;
+      let peerIp;
       let username;
 
-      signalingServer.onmessage = (message) => {
-        const data = JSON.parse(message.data);
-        if (data.type === 'offer') {
-          localConnection.setRemoteDescription(new RTCSessionDescription(data));
-          localConnection.createAnswer().then((answer) => {
-            localConnection.setLocalDescription(answer);
-            signalingServer.send(
-              JSON.stringify({
-                action: 'signal',
-                to: data.from,
-                data: { type: 'answer', answer: answer },
-              }),
-            );
-          });
-        } else if (data.type === 'answer') {
-          localConnection.setRemoteDescription(
-            new RTCSessionDescription(data.answer),
-          );
-        } else if (data.type === 'candidate') {
-          localConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      // Função para conectar ao servidor WebSocket
+      function connect() {
+        peerIp = document.getElementById('ip').value;
+        username = document.getElementById('name').value;
+        let wsUrl = `ws://${peerIp}:8765/`; // Conectar ao servidor WebSocket
+        logMessage('Conectando...');
+        try {
+          websocket = new WebSocket(wsUrl);
+
+          websocket.onopen = function () {
+            logMessage('Conectado');
+            document.getElementById('closeConnection').style.display = 'block';
+          };
+
+          websocket.onmessage = function (event) {
+            console.log('Mensagem recebida:', event.data); // Depuração
+            const decryptedMessage = caesarCipher(event.data, -3);
+            console.log('Mensagem descriptografada:', decryptedMessage); // Depuração
+            logMessage(decryptedMessage); // Exibe a mensagem descriptografada
+          };
+
+          websocket.onerror = function (event) {
+            console.error('Erro de WebSocket:', event);
+            logMessage('Erro ao iniciar conexão');
+          };
+
+          websocket.onclose = function () {
+            logMessage('Conexão fechada');
+            document.getElementById('closeConnection').style.display = 'none';
+          };
+        } catch (error) {
+          console.error('Erro ao criar WebSocket:', error);
+          logMessage('Erro ao iniciar conexão');
         }
-      };
+      }
 
-      document.getElementById('connect').onclick = () => {
-        username = document.getElementById('username').value;
-        const peer = document.getElementById('peer').value;
-        signalingServer.send(
-          JSON.stringify({ action: 'register', username: username }),
-        );
-
-        localConnection = new RTCPeerConnection();
-        dataChannel = localConnection.createDataChannel('chat');
-
-        dataChannel.onmessage = (event) => {
-          const chat = document.getElementById('chat');
-          chat.innerHTML += `<p>${event.data}</p>`;
-          chat.scrollTop = chat.scrollHeight;
-        };
-
-        localConnection.onicecandidate = (event) => {
-          if (event.candidate) {
-            signalingServer.send(
-              JSON.stringify({
-                action: 'signal',
-                to: peer,
-                data: { type: 'candidate', candidate: event.candidate },
-              }),
-            );
-          }
-        };
-
-        if (peer) {
-          localConnection.createOffer().then((offer) => {
-            localConnection.setLocalDescription(offer);
-            signalingServer.send(
-              JSON.stringify({
-                action: 'signal',
-                to: peer,
-                data: { type: 'offer', offer: offer },
-              }),
-            );
-          });
+      // Função para desconectar
+      function closeConnection() {
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+          websocket.close();
         }
-      };
+      }
 
-      document.getElementById('send').onclick = () => {
+      // Função para enviar a mensagem
+      function sendMessage() {
         const message = document.getElementById('message').value;
-        dataChannel.send(message);
+        const fullMessage = `${username}: ${message}`;
+
+        // Verifica se o WebSocket está aberto antes de enviar
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+          const encryptedMessage = caesarCipher(fullMessage, 3);
+          websocket.send(encryptedMessage);
+          logMessage('Você: ' + message);
+        } else {
+          logMessage('Erro: A conexão está fechada ou inativa.');
+        }
+
         document.getElementById('message').value = '';
-      };
+      }
+
+      // Função para criptografar/descriptografar a mensagem (Cifra de César)
+      function caesarCipher(text, shift) {
+        return text
+          .split('')
+          .map((char) =>
+            String.fromCharCode((char.charCodeAt(0) + shift) % 256),
+          )
+          .join('');
+      }
+
+      // Função para exibir as mensagens no chat
+      function logMessage(message) {
+        var chat = document.getElementById('chat');
+        var p = document.createElement('p');
+        p.textContent = message;
+        chat.appendChild(p);
+        chat.scrollTop = chat.scrollHeight;
+      }
     </script>
   </body>
 </html>
