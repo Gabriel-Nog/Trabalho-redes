@@ -18,19 +18,27 @@ def caesar_decipher(text, shift):
 # Função para lidar com a comunicação entre os clientes
 async def handler(websocket, path):
     connected_clients.add(websocket)
+    print(f"Novo cliente conectado: {websocket.remote_address}")
+
     try:
         async for message in websocket:
-            # Descriptografa a mensagem recebida
+            print(f"Mensagem recebida do cliente {websocket.remote_address}: {message}")
             decrypted_message = caesar_decipher(message, 3)
-            print(f"Recebido: {decrypted_message}")
+            print(f"Mensagem descriptografada: {decrypted_message}")
 
             # Envia a mensagem cifrada para todos os outros clientes conectados
             for client in connected_clients:
                 if client != websocket:  # Não envie a mensagem de volta para o próprio cliente
                     encrypted_message = caesar_cipher(decrypted_message, 3)  # Cifra a mensagem novamente
-                    await client.send(encrypted_message)
+                    try:
+                        await client.send(encrypted_message)
+                        print(f"Mensagem enviada para {client.remote_address}")
+                    except websockets.exceptions.ConnectionClosed:
+                        # Se a conexão do cliente estiver fechada, remova-o da lista
+                        connected_clients.remove(client)
     finally:
         connected_clients.remove(websocket)
+        print(f"Cliente {websocket.remote_address} desconectado")
 
 # Função para iniciar o servidor WebSocket (escutando por conexões de outros clientes)
 async def start_server():

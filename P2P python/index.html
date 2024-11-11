@@ -68,8 +68,9 @@
           };
 
           websocket.onmessage = function (event) {
-            // Mensagens recebidas (descriptografar)
+            console.log('Mensagem recebida:', event.data); // Depuração
             const decryptedMessage = caesarCipher(event.data, -3);
+            console.log('Mensagem descriptografada:', decryptedMessage); // Depuração
             logMessage(decryptedMessage); // Exibe a mensagem descriptografada
           };
 
