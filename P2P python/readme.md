@@ -1,11 +1,15 @@
-Passo 0:
-pip install -r requirements.txt
-
 Passo 1:
-python server.py
+Certifique-se que a depedência tkinter esteja intalada em seu computador;
+
+//Crie um arquivo tkinterVersion.py e cole o código a seguir:
+import tkinter
+
+# Obtendo a versão do tkinter
+tkinter_version = tkinter.TkVersion
+
+print(f"A versão do tkinter instalada é: {tkinter_version}")
+
+//Caso não imprima nada ou "tkinter não instalado", procure essa depedência em https://tkdocs.com/ para a instalação adequada em seu sistema opercional;
 
 Passo 2:
-python http_server.py
-
-Passo 3:
-acessar: http://0.0.0.0:8000/index.html
+python p2pchat.py

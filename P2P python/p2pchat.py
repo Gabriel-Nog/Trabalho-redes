@@ -55,11 +55,14 @@ class P2PClient:
     
     def send_message(self):
         message = self.message_entry.get()
+        self.display_message(f"Você: {message}\n")
         self.message_entry.delete(0, tk.END)
         encrypted_message = caesar_cipher(f"{self.username}: {message}", 3)
         if self.peer_socket:
             self.peer_socket.send(encrypted_message.encode('utf-8'))
+        
     
+        
     def listen_for_connections(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind(('0.0.0.0', 9999))
@@ -87,13 +90,26 @@ class P2PClient:
         self.peer_socket.connect((peer_ip, 9999))
         self.display_message(f"Conectado ao peer {peer_ip}")
         threading.Thread(target=self.receive_messages).start()
-    
+
+        self.logout_button = tk.Button(self.window, text="Desconectar", command=self.logout)
+        self.logout_button.pack(padx=10, pady=10)
+
     def on_close(self):
         if self.peer_socket:
             self.peer_socket.close()
         if self.socket:
             self.socket.close()
         self.window.destroy()
-
+    
+    def logout(self):
+        if self.peer_socket:
+            self.peer_socket.close()
+        if self.socket:
+            self.socket.close()
+        
+        self.display_message("Desconectado")
+        self.peer_ip_entry.delete(0, tk.END)
+        self.logout_button.destroy()
+        
 if __name__ == "__main__":
     P2PClient()
