@@ -5,6 +5,7 @@ Certifique-se que a depedência tkinter esteja intalada em seu computador;
 import tkinter
 
 # Obtendo a versão do tkinter
+
 tkinter_version = tkinter.TkVersion
 
 print(f"A versão do tkinter instalada é: {tkinter_version}")
@@ -12,4 +13,5 @@ print(f"A versão do tkinter instalada é: {tkinter_version}")
 //Caso não imprima nada ou "tkinter não instalado", procure essa depedência em https://tkdocs.com/ para a instalação adequada em seu sistema opercional;
 
 Passo 2:
+Estando na pasta P2P PYTHON, abra o terminal na pasta P2P python e execute:
 python p2pchat.py
