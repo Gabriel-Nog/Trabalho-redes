@@ -55,7 +55,7 @@ class P2PClient:
     
     def send_message(self):
         message = self.message_entry.get()
-        self.display_message(f"Você: {message}\n")
+        self.display_message(f"Você: {message}")
         self.message_entry.delete(0, tk.END)
         encrypted_message = caesar_cipher(f"{self.username}: {message}", 3)
         if self.peer_socket:
